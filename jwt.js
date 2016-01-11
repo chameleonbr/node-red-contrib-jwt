@@ -70,6 +70,7 @@ module.exports = function (RED) {
             jwt.verify(msg[node.signvar], node.secret, {algorithms: node.alg}, function (err, decoded) {
                 if (err) {
                     msg['payload'] = err;
+                    msg['statusCode'] = 401;
                     node.send([null, msg]);
                 } else {
                     msg[node.storetoken] = decoded;

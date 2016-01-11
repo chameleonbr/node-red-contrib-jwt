@@ -8,11 +8,12 @@
         defaults: {
             name: { value: "" },
             topic: { value: "" },
-			alg: { value: "HS256" },
-			exp: { value: 3600, validation: RED.validators.number() },
+            alg: { value: "HS256" },
+            exp: { value: 3600, validation: RED.validators.number() },
             secret: { value: "" },
             key: { value: "" },
-			signvar: { value: "payload",required:true }
+            signvar: { value: "payload",required:true },
+            storetoken: { value: "payload" }
         },
         label: function() {
             return this.name || "JWT Sign"
@@ -56,8 +57,16 @@
         <input type="text" id="node-input-key" placeholder="Key File">
 	</div>
 	<div class="form-row">
-        <label for="node-config-input-signvar"><i class="fa fa-book"></i> Sign:</label>
-        <select id="node-config-input-signvar">
+        <label for="node-input-signvar"><i class="fa fa-book"></i> Sign:</label>
+        <select id="node-input-signvar">
+            <option value="payload" selected>msg.payload</option>
+            <option value="token">msg.token</option>
+            <option value="topic">msg.topic</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-storetoken"><i class="fa fa-book"></i> Store Token:</label>
+        <select id="node-input-storetoken">
             <option value="payload" selected>msg.payload</option>
             <option value="token">msg.token</option>
             <option value="topic">msg.topic</option>
@@ -80,19 +89,15 @@
         defaults: {
             name: { value: "" },
             topic: { value: "" },
-			alg: { value: ["HS256"] },
+            alg: { value: ["HS256"] },
             secret: { value: "" },
             key: { value: "" },
-			signvar: { value: "payload" },
-			storetoken: { value: "payload" }
+            signvar: { value: "payload" },
+            storetoken: { value: "payload" }
         },
         label: function() {
             return this.name || "JWT verify"
-        },
-		oneditsave: function(){
-			console.log($('#node-input-signtype').val());
-			console.log(this);
-		}
+        }
     });
 </script>
 
@@ -148,5 +153,6 @@
 
 <script type="text/x-red" data-help-name="jwt verify">
    <p>Verify JWT signature JWT</p>
-   <p>Verify and store result on msg.payload.</p>
+   <p>Verify and store result on msg.payload, topic or token.</p>
+   <p>Second output receive error responses from JWT lib.</p>
 </script>

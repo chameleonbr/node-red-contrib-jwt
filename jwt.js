@@ -11,6 +11,7 @@ module.exports = function (RED) {
         this.secret = n.secret;
         this.key = n.key;
         this.signvar = n.signvar;
+        this.storetoken = n.storetoken;
         var node = this;
         node.on('input', function (msg) {
             try {
@@ -19,11 +20,11 @@ module.exports = function (RED) {
                         node.alg === 'RS512') {
                     node.secret = fs.readFileSync(node.key);
                 }
-
                 jwt.sign(msg[node.signvar],
                         node.secret,
                         {algorithm: node.alg, expiresIn: node.exp}, function (token) {
-                    node.send({payload: token});
+                    msg[node.storetoken] = token;
+                    node.send(msg);
                 });
             } catch (err) {
                 node.error(err.message);

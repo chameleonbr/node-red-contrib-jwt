@@ -1,0 +1,152 @@
+<script type="text/javascript">
+    RED.nodes.registerType('jwt sign',{
+        category: "function",
+        icon: "hash.png",
+        color: "#a6bbcf",
+        inputs: 1,
+        outputs: 1,
+        defaults: {
+            name: { value: "" },
+            topic: { value: "" },
+			alg: { value: "HS256" },
+			exp: { value: 3600, validation: RED.validators.number() },
+            secret: { value: "" },
+            key: { value: "" },
+			signvar: { value: "payload",required:true }
+        },
+        label: function() {
+            return this.name || "JWT Sign"
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="jwt sign">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+	</div>
+	<div class="form-row">
+        <label for="node-input-topic"><i class="icon-tasks"></i> Topic</label>
+        <input type="text" id="node-input-topic" placeholder="Topic">
+	</div>
+	<div class="form-row">
+        <label for="node-input-alg"><i class="fa fa-unlock"></i> Algorithm:</label>
+        <select id="node-input-alg">
+            <option value="HS256" selected>HS256</option>
+            <option value="HS384">HS384</option>
+            <option value="HS512">HS512</option>
+            <option value="RS256">RS256</option>
+            <option value="RS384">RS384</option>
+            <option value="RS512">RS512</option>
+            <!--option value="ES256">ES256</option>
+            <option value="ES384">ES384</option>
+            <option value="ES512">ES512</option-->
+        </select>
+    </div>
+	<div class="form-row">
+        <label for="node-input-exp"><i class="fa fa-lock"></i> Expiration</label>
+        <input type="text" id="node-input-exp" placeholder="Expiration in seconds">
+	</div>
+	<div class="form-row">
+        <label for="node-input-secret"><i class="fa fa-lock"></i> Secret</label>
+        <input type="password" id="node-input-secret" placeholder="Secret">
+	</div>
+	<div class="form-row">
+        <label for="node-input-key"><i class="fa fa-file"></i> Key File</label>
+        <input type="text" id="node-input-key" placeholder="Key File">
+	</div>
+	<div class="form-row">
+        <label for="node-config-input-signvar"><i class="fa fa-book"></i> Sign:</label>
+        <select id="node-config-input-signvar">
+            <option value="payload" selected>msg.payload</option>
+            <option value="token">msg.token</option>
+            <option value="topic">msg.topic</option>
+        </select>
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="jwt sign">
+   <p>Sign using JWT protocol</p>
+   <p>Sign and store result on msg.payload.</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('jwt verify',{
+        category: "function",
+        icon: "hash.png",
+        color: "#a6bbcf",
+        inputs: 1,
+        outputs: 2,
+        defaults: {
+            name: { value: "" },
+            topic: { value: "" },
+			alg: { value: ["HS256"] },
+            secret: { value: "" },
+            key: { value: "" },
+			signvar: { value: "payload" },
+			storetoken: { value: "payload" }
+        },
+        label: function() {
+            return this.name || "JWT verify"
+        },
+		oneditsave: function(){
+			console.log($('#node-input-signtype').val());
+			console.log(this);
+		}
+    });
+</script>
+
+<script type="text/x-red" data-template-name="jwt verify">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+  </div>
+	<div class="form-row">
+        <label for="node-input-topic"><i class="icon-tasks"></i> Topic</label>
+        <input type="text" id="node-input-topic" placeholder="Topic">
+  </div>
+  <div class="form-row">
+        <label for="node-input-alg"><i class="fa fa-unlock"></i> Algorithm:</label>
+        <select id="node-input-alg" multiple>
+            <option value="HS256" selected>HS256</option>
+            <option value="HS384">HS384</option>
+            <option value="HS512">HS512</option>
+            <option value="RS256">RS256</option>
+            <option value="RS384">RS384</option>
+            <option value="RS512">RS512</option>
+            <!--option value="ES256">ES256</option>
+            <option value="ES384">ES384</option>
+            <option value="ES512">ES512</option-->
+        </select>
+    </div>
+	<div class="form-row">
+        <label for="node-input-secret"><i class="fa fa-lock"></i> Secret</label>
+        <input type="password" id="node-input-secret" placeholder="Secret">
+  </div>
+  <div class="form-row">
+        <label for="node-input-key"><i class="fa fa-file"></i> Key File</label>
+        <input type="text" id="node-input-key" placeholder="Key File">
+  </div>
+  <div class="form-row">
+        <label for="node-input-signvar"><i class="fa fa-book"></i> Verify:</label>
+        <select id="node-input-signvar">
+            <option value="payload" selected>msg.payload</option>
+            <option value="token">msg.token</option>
+            <option value="topic">msg.topic</option>
+			<option value="bearer">Auth Bearer and Access Token Param(HTTP)</option>
+        </select>
+    </div>
+  <div class="form-row">
+        <label for="node-input-storetoken"><i class="fa fa-book"></i> Store Token:</label>
+        <select id="node-input-storetoken">
+            <option value="payload" selected>msg.payload</option>
+            <option value="token">msg.token</option>
+            <option value="topic">msg.topic</option>
+        </select>
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="jwt verify">
+   <p>Verify JWT signature JWT</p>
+   <p>Verify and store result on msg.payload.</p>
+</script>

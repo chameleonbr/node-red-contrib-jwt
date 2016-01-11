@@ -1,6 +1,6 @@
 {
     "name": "node-red-contrib-jwt",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "description": "JWT Validator and Signer ",
     "main": "index.js",
     "repository": {

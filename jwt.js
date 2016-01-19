@@ -59,8 +59,11 @@ module.exports = function (RED) {
             }
 
             if (node.signvar === 'bearer') {
-                if (msg.req.headers.authorization !== undefined) {
-                    msg.bearer = msg.req.headers.authorization.substring(7);
+                if (msg.req !== undefined && msg.req.get('authorization') !== undefined) {
+                    var authz = msg.req.get('authorization').split(' ');
+                    if(authz.length == 2 && authz[0] === 'Bearer'){
+                        msg.bearer = authz[1];
+                    }
                 } else if (msg.req.query.access_token !== undefined) {
                     msg.bearer = msg.req.query.access_token;
                 } else if (msg.req.body !== undefined && msg.req.body.access_token !== undefined) {
@@ -72,7 +75,7 @@ module.exports = function (RED) {
                 if (err) {
                     msg['payload'] = err;
                     msg['statusCode'] = 401;
-                    node.send([null, msg]);
+                    node.error(err,msg);
                 } else {
                     msg[node.storetoken] = decoded;
                     node.send([msg, null]);

@@ -3,7 +3,6 @@ module.exports = function (RED) {
     var fs = require('fs');
     function JwtSign(n) {
         RED.nodes.createNode(this, n);
-        this.topic = n.topic;
         this.name = n.name;
         this.payload = n.payload;
         this.alg = n.alg;
@@ -44,7 +43,6 @@ module.exports = function (RED) {
 
     function JwtVerify(n) {
         RED.nodes.createNode(this, n);
-        this.topic = n.topic;
         this.name = n.name;
         this.payload = n.payload;
         this.alg = n.alg;

@@ -7,7 +7,6 @@
         outputs: 1,
         defaults: {
             name: { value: "" },
-            topic: { value: "" },
             alg: { value: "HS256" },
             exp: { value: 3600, validation: RED.validators.number() },
             secret: { value: "" },
@@ -22,13 +21,10 @@
 </script>
 
 <script type="text/x-red" data-template-name="jwt sign">
+  <input type="password" style="width: 0;height: 0; visibility: hidden;position:absolute;left:0;top:0;"/>
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
-	</div>
-	<div class="form-row">
-        <label for="node-input-topic"><i class="icon-tasks"></i> Topic</label>
-        <input type="text" id="node-input-topic" placeholder="Topic">
 	</div>
 	<div class="form-row">
         <label for="node-input-alg"><i class="fa fa-unlock"></i> Algorithm:</label>
@@ -85,7 +81,6 @@
         outputs: 1,
         defaults: {
             name: { value: "" },
-            topic: { value: "" },
             alg: { value: ["HS256"] },
             secret: { value: "" },
             key: { value: "" },
@@ -99,13 +94,10 @@
 </script>
 
 <script type="text/x-red" data-template-name="jwt verify">
-    <div class="form-row">
+  <input type="password" style="width: 0;height: 0; visibility: hidden;position:absolute;left:0;top:0;"/>
+  <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
-  </div>
-	<div class="form-row">
-        <label for="node-input-topic"><i class="icon-tasks"></i> Topic</label>
-        <input type="text" id="node-input-topic" placeholder="Topic">
   </div>
   <div class="form-row">
         <label for="node-input-alg"><i class="fa fa-unlock"></i> Algorithm:</label>
@@ -120,8 +112,8 @@
             <option value="ES384">ES384</option>
             <option value="ES512">ES512</option-->
         </select>
-    </div>
-	<div class="form-row">
+  </div>
+  <div class="form-row">
         <label for="node-input-secret"><i class="fa fa-lock"></i> Secret</label>
         <input type="password" id="node-input-secret" placeholder="Secret">
   </div>
@@ -135,9 +127,9 @@
             <option value="payload" selected>msg.payload</option>
             <option value="token">msg.token</option>
             <option value="topic">msg.topic</option>
-			<option value="bearer">Auth Bearer and Access Token Param(HTTP)</option>
+            <option value="bearer">Auth Bearer and Access Token Param(HTTP)</option>
         </select>
-    </div>
+  </div>
   <div class="form-row">
         <label for="node-input-storetoken"><i class="fa fa-book"></i> Store Token:</label>
         <select id="node-input-storetoken">
@@ -145,7 +137,7 @@
             <option value="token">msg.token</option>
             <option value="topic">msg.topic</option>
         </select>
-    </div>
+  </div>
 </script>
 
 <script type="text/x-red" data-help-name="jwt verify">

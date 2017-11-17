@@ -17,7 +17,9 @@ module.exports = function (RED) {
                 if (node.alg === 'RS256' ||
                         node.alg === 'RS384' ||
                         node.alg === 'RS512') {
-                    node.secret = fs.readFileSync(node.key);
+                    node.secret = process.env.NODE_RED_NODE_JWT_PRIVATE_KEY || fs.readFileSync(node.key);
+                } else {
+                    node.secret = process.env.NODE_RED_NODE_JWT_SECRET || node.secret;
                 }
                 jwt.sign(msg[node.signvar],
                         node.secret,
@@ -53,7 +55,9 @@ module.exports = function (RED) {
         var node = this;
         node.on('input', function (msg) {
             if (contains(node.alg, 'RS256') || contains(node.alg, 'RS384') || contains(node.alg, 'RS512')) {
-                node.secret = fs.readFileSync(node.key);
+                node.secret = process.env.NODE_RED_NODE_JWT_PUBLIC_KEY || fs.readFileSync(node.key);
+            } else {
+                node.secret = process.env.NODE_RED_NODE_JWT_SECRET || node.secret;
             }
 
             if (node.signvar === 'bearer') {

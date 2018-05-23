@@ -16,7 +16,10 @@ module.exports = function (RED) {
             try {
                 if (node.alg === 'RS256' ||
                         node.alg === 'RS384' ||
-                        node.alg === 'RS512') {
+                        node.alg === 'RS512' || 
+                        node.alg === 'ES256' ||
+                        node.alg === 'ES384' ||
+                        node.alg === 'ES512') {
                     node.secret = process.env.NODE_RED_NODE_JWT_PRIVATE_KEY || fs.readFileSync(node.key);
                 } else {
                     node.secret = process.env.NODE_RED_NODE_JWT_SECRET || node.secret;
@@ -75,12 +78,13 @@ module.exports = function (RED) {
 
             if (node.jwk) {
                 //use JWK to verify
-                var kid = GetTokenKid(msg[node.signvar]);
-                var key = node.jwk.findKeyById(kid);
+                var header = GetTokenHeader(msg[node.signvar]);
+                var key = node.jwk.findKeyById(header.kid);
+                node.alg = header.alg;
                 node.secret = key.key.toPublicKeyPEM();
 
             } else {
-                if (contains(node.alg, 'RS256') || contains(node.alg, 'RS384') || contains(node.alg, 'RS512')) {
+                if (contains(node.alg, 'RS256') || contains(node.alg, 'RS384') || contains(node.alg, 'RS512') || contains(node.alg, 'ES512') || contains(node.alg, 'ES384') || contains(node.alg, 'ES256')) {
                     node.secret = process.env.NODE_RED_NODE_JWT_PUBLIC_KEY || fs.readFileSync(node.key);
                 } else {
                     node.secret = process.env.NODE_RED_NODE_JWT_SECRET || node.secret;
@@ -122,8 +126,13 @@ module.exports = function (RED) {
 
     function GetTokenKid(token) {
         //get kid from token header
+        var header = GetTokenHeader(token);
+        return header.kid;
+    }
+
+    function GetTokenHeader(token) {
         var json = jwt.decode(token, {complete: true});
-        return json.header.kid;
+        return json.header;
     }
 };
 

@@ -36,5 +36,5 @@ Flow JSON:
 ```
 
 ## Useful sites:
-https://mkjwk.org/ - Create JWK keysets
-https://jwt.io/ - Debug JWT tokens
+* https://mkjwk.org/ - Create JWK keysets
+* https://jwt.io/ - Debug JWT tokens

@@ -7,14 +7,28 @@ module.exports = function (RED) {
         this.payload = n.payload;
         this.alg = n.alg;
         this.exp = n.exp;
+        this.jwkurl = n.jwkurl;
+        this.jwkkid = n.jwkkid;
         this.secret = n.secret;
         this.key = n.key;
         this.signvar = n.signvar;
         this.storetoken = n.storetoken;
         var node = this;
+
+        if (node.jwkurl) {
+            GetJWK(node.jwkurl, node);
+        }
+
         node.on('input', function (msg) {
             try {
-                if (node.alg === 'RS256' ||
+                if (node.jwk) {
+                    //use JWK to sign
+                    var key = node.jwk.findKeyById(node.jwkkid);
+                    if (key === undefined) {
+                        console.log("No Key Found in JWK: " + node.jwkkid)
+                    }
+                    node.secret = key.key.toPrivateKeyPEM();
+                } else if (node.alg === 'RS256' ||
                         node.alg === 'RS384' ||
                         node.alg === 'RS512' || 
                         node.alg === 'ES256' ||
@@ -26,9 +40,13 @@ module.exports = function (RED) {
                 }
                 jwt.sign(msg[node.signvar],
                         node.secret,
-                        {algorithm: node.alg, expiresIn: node.exp}, function (token) {
-                    msg[node.storetoken] = token;
-                    node.send(msg);
+                        {algorithm: node.alg, expiresIn: node.exp, keyid: node.jwkkid}, function (err, token) {
+                    if (err) {
+                        node.error(err);
+                    } else {
+                        msg[node.storetoken] = token;
+                        node.send(msg);
+                    }
                 });
             } catch (err) {
                 node.error(err.message);
@@ -79,7 +97,17 @@ module.exports = function (RED) {
             if (node.jwk) {
                 //use JWK to verify
                 var header = GetTokenHeader(msg[node.signvar]);
-                var key = node.jwk.findKeyById(header.kid);
+                //find kid if present
+                var kid = header.kid;
+                var key;
+
+                if (kid !== undefined) {
+                    key = node.jwk.findKeyById(kid);
+                } else {
+                    //...otherwise use first key in set
+                    key = node.jwk.keys[0];
+                }
+                
                 node.alg = header.alg;
                 node.secret = key.key.toPublicKeyPEM();
 
@@ -107,7 +135,6 @@ module.exports = function (RED) {
 
     function GetJWK(url, node) {
         //fetch jwk and cache it in node
-        console.log("Fetching JWK: " + url)
         var jwk;
         var njwk = require('node-jwk');
         var request = require("request");
@@ -117,7 +144,7 @@ module.exports = function (RED) {
         }, function (error, response, body) {
             if (!error && response.statusCode === 200) {
                 node.jwk = njwk.JWKSet.fromObject(body);
-                console.log(node.jwk._keys.length + " keys loaded from JWK");
+                console.log(node.jwk._keys.length + " keys loaded from JWK: " + url );
             } else {
                 console.log("Unable to fetch JWK: " + url);
             }

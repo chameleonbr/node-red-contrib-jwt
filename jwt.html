@@ -9,6 +9,8 @@
             name: { value: "" },
             alg: { value: "HS256" },
             exp: { value: 3600, validation: RED.validators.number() },
+            jwkurl: { value: "" },
+            jwkkid: { value: "" },
             secret: { value: "" },
             key: { value: "" },
             signvar: { value: "payload",required:true },
@@ -35,12 +37,23 @@
             <option value="RS256">RS256</option>
             <option value="RS384">RS384</option>
             <option value="RS512">RS512</option>
+            <option value="ES256">ES256</option>
+            <option value="ES384">ES384</option>
+            <option value="ES512">ES512</option>
         </select>
     </div>
 	<div class="form-row">
         <label for="node-input-exp"><i class="fa fa-lock"></i> Expiration</label>
         <input type="text" id="node-input-exp" placeholder="Expiration in seconds">
 	</div>
+    <div class="form-row">
+        <label for="node-input-jwkurl"><i class="fa fa-lock"></i> JWK URL</label>
+        <input type="text" id="node-input-jwkurl" placeholder="http://localhost:1800/jwk_uri">
+    </div>
+    <div class="form-row">
+        <label for="node-input-jwkkid"><i class="fa fa-lock"></i> JWK KID</label>
+        <input type="text" id="node-input-jwkkid" placeholder="my_key_id">
+    </div>
 	<div class="form-row">
         <label for="node-input-secret"><i class="fa fa-lock"></i> Secret</label>
         <input type="password" id="node-input-secret" placeholder="Secret">
@@ -91,6 +104,8 @@
     <h3>Details</h3>
         <p>Location of signing payload and resulting token may be configured to use other message properties</p>
 
+        <p>If defined, the <code>JWK URL</code> will be used instead of a secret/key file for signing.  The <code>JWK KID</code> setting will be used to select the apropriate key from the JWK key set</p>
+
         <p>Algorithms RS256, RS384, RS512 use a PEM encoded private key file loaded from the <code>Key File</code> property, or string containing the key from <code>NODE_RED_NODE_JWT_PRIVATE_KEY</code> environment variable.</p>
 
         <p>Algorithms HS256, HS384, HS512 use the <code>secret</code> property or the <code>NODE_RED_NODE_JWT_SECRET</code> environment variable.</p>
@@ -138,14 +153,14 @@
             <option value="RS256">RS256</option>
             <option value="RS384">RS384</option>
             <option value="RS512">RS512</option>
-            option value="ES256">ES256</option>
+            <option value="ES256">ES256</option>
             <option value="ES384">ES384</option>
             <option value="ES512">ES512</option>
         </select>
   </div>
   <div class="form-row">
     <label for="node-input-jwkurl"><i class="fa fa-lock"></i> JWK URL</label>
-    <input type="text" id="node-input-jwkurl" placeholder="http://blah.blah/oauth2/jwk_uri">
+    <input type="text" id="node-input-jwkurl" placeholder="http://localhost:1800/jwk_uri">
   </div>
   <div class="form-row">
         <label for="node-input-secret"><i class="fa fa-lock"></i> Secret</label>

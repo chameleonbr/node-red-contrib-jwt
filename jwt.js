@@ -17,9 +17,24 @@ module.exports = function (RED) {
 
         if (node.jwkurl) {
             GetJWK(node.jwkurl, node);
+        }else{
+            node.jwk = false;
+            // changed to load key on deploy level and not on runtime level why fs.readFileSync is sync.
+            if (node.alg === 'RS256' ||
+                node.alg === 'RS384' ||
+                node.alg === 'RS512' || 
+                node.alg === 'ES256' ||
+                node.alg === 'ES384' ||
+                node.alg === 'ES512') {
+                node.secret = process.env.NODE_RED_NODE_JWT_PRIVATE_KEY || fs.readFileSync(node.key);
+            } else {
+                node.secret = process.env.NODE_RED_NODE_JWT_SECRET || node.secret;
+            }
         }
+        node.on('input', function (msg, send, done) {
+            send = send || function() { node.send.apply(node,arguments) }
+            done = done || function(err) { if(err)node.error(err, msg); }
 
-        node.on('input', function (msg) {
             try {
                 if (node.jwk) {
                     //use JWK to sign
@@ -28,24 +43,16 @@ module.exports = function (RED) {
                         console.log("No Key Found in JWK: " + node.jwkkid)
                     }
                     node.secret = key.key.toPrivateKeyPEM();
-                } else if (node.alg === 'RS256' ||
-                        node.alg === 'RS384' ||
-                        node.alg === 'RS512' || 
-                        node.alg === 'ES256' ||
-                        node.alg === 'ES384' ||
-                        node.alg === 'ES512') {
-                    node.secret = process.env.NODE_RED_NODE_JWT_PRIVATE_KEY || fs.readFileSync(node.key);
-                } else {
-                    node.secret = process.env.NODE_RED_NODE_JWT_SECRET || node.secret;
                 }
                 jwt.sign(msg[node.signvar],
                         node.secret,
                         {algorithm: node.alg, expiresIn: node.exp, keyid: node.jwkkid}, function (err, token) {
                     if (err) {
-                        node.error(err);
+                       done(err);
                     } else {
                         msg[node.storetoken] = token;
-                        node.send(msg);
+                        send(msg);
+                        done();
                     }
                 });
             } catch (err) {
@@ -78,13 +85,22 @@ module.exports = function (RED) {
 
         if (node.jwkurl) {
             GetJWK(node.jwkurl, node);
+        }else{
+            node.jwk = false;
+            if (contains(node.alg, 'RS256') || contains(node.alg, 'RS384') || contains(node.alg, 'RS512') || contains(node.alg, 'ES512') || contains(node.alg, 'ES384') || contains(node.alg, 'ES256')) {
+                node.secret = process.env.NODE_RED_NODE_JWT_PUBLIC_KEY || fs.readFileSync(node.key);
+            } else {
+                node.secret = process.env.NODE_RED_NODE_JWT_SECRET || node.secret;
+            }
         }
 
-        node.on('input', function (msg) {
+        node.on('input', function (msg, send, done) {
+            send = send || function() { node.send.apply(node,arguments) }
+            done = done || function(err) { if(err)node.error(err, msg); }
             if (node.signvar === 'bearer') {
                 if (msg.req !== undefined && msg.req.get('authorization') !== undefined) {
                     var authz = msg.req.get('authorization').split(' ');
-                    if(authz.length == 2 && authz[0] === 'Bearer'){
+                    if(authz.length == 2 && (authz[0] === 'Bearer' || (msg.prefix !== undefined && authz[0] === msg.prefix))){
                         msg.bearer = authz[1];
                    }
                 } else if (msg.req.query.access_token !== undefined) {
@@ -110,23 +126,17 @@ module.exports = function (RED) {
                 
                 node.alg = header.alg;
                 node.secret = key.key.toPublicKeyPEM();
-
-            } else {
-                if (contains(node.alg, 'RS256') || contains(node.alg, 'RS384') || contains(node.alg, 'RS512') || contains(node.alg, 'ES512') || contains(node.alg, 'ES384') || contains(node.alg, 'ES256')) {
-                    node.secret = process.env.NODE_RED_NODE_JWT_PUBLIC_KEY || fs.readFileSync(node.key);
-                } else {
-                    node.secret = process.env.NODE_RED_NODE_JWT_SECRET || node.secret;
-                }
             }
 
             jwt.verify(msg[node.signvar], node.secret, {algorithms: node.alg}, function (err, decoded) {
                 if (err) {
                     msg['payload'] = err;
                     msg['statusCode'] = 401;
-                    node.error(err,msg);
+                    done(err);
                 } else {
                     msg[node.storetoken] = decoded;
-                    node.send([msg, null]);
+                    send([msg, null]);
+                    done();
                 }
             });
         });

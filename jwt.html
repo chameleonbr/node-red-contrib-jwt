@@ -128,6 +128,7 @@
             alg: { value: ["HS256"] },
             jwkurl: { value: "" },
             secret: { value: "" },
+            secb64enc: { value: "false" },
             key: { value: "" },
             signvar: { value: "payload" },
             storetoken: { value: "payload" }
@@ -165,6 +166,13 @@
   <div class="form-row">
         <label for="node-input-secret"><i class="fa fa-lock"></i> Secret</label>
         <input type="password" id="node-input-secret" placeholder="Secret">
+  </div>
+  <div class="form-row">
+        <label for="node-input-secb64enc"><i class="fa fa-lock"></i> SecB64Enc.</label>
+		<select id="node-input-secb64enc">
+            <option value="false" selected>False</option>
+            <option value="true">True</option>
+        </select>
   </div>
   <div class="form-row">
         <label for="node-input-key"><i class="fa fa-file"></i> Key File</label>
@@ -233,6 +241,8 @@
         <p>If defined, the <code>JWK URL</code> will be used instead of a secret/key file for validation.  The <code>kid</code> of the input token will be used to select the apropriate key from the JWK key set</p>
 
         <p>Algorithms RS256, RS384, RS512, ES256, ES384, ES512  use a PEM encoded public key file loaded from the <code>Key File</code> property, or string containing the key from <code>NODE_RED_NODE_JWT_PUBLIC_KEY</code> environment variable.</p>
+
+		<p>Select <code>SecB64Enc.</code> as True if the secret base64 encoded</p>
 
         <p>Algorithms HS256, HS384, HS512 use the <code>secret</code> property or the <code>NODE_RED_NODE_JWT_SECRET</code> environment variable.</p>
 

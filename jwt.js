@@ -22,7 +22,7 @@ module.exports = function (RED) {
             // changed to load key on deploy level and not on runtime level why fs.readFileSync is sync.
             if (node.alg === 'RS256' ||
                 node.alg === 'RS384' ||
-                node.alg === 'RS512' || 
+                node.alg === 'RS512' ||
                 node.alg === 'ES256' ||
                 node.alg === 'ES384' ||
                 node.alg === 'ES512') {
@@ -45,16 +45,16 @@ module.exports = function (RED) {
                     node.secret = key.key.toPrivateKeyPEM();
                 }
                 jwt.sign(msg[node.signvar],
-                        node.secret,
-                        {algorithm: node.alg, expiresIn: node.exp, keyid: node.jwkkid}, function (err, token) {
-                    if (err) {
-                       done(err);
-                    } else {
-                        msg[node.storetoken] = token;
-                        send(msg);
-                        done();
-                    }
-                });
+                    node.secret,
+                    {algorithm: node.alg, expiresIn: node.exp, keyid: node.jwkkid}, function (err, token) {
+                        if (err) {
+                            done(err);
+                        } else {
+                            msg[node.storetoken] = token;
+                            send(msg);
+                            done();
+                        }
+                    });
             } catch (err) {
                 node.error(err.message);
             }
@@ -78,6 +78,7 @@ module.exports = function (RED) {
         this.alg = n.alg;
         this.jwkurl = n.jwkurl;
         this.secret = n.secret;
+        this.secb64enc = n.secb64enc;
         this.key = n.key;
         this.signvar = n.signvar;
         this.storetoken = n.storetoken;
@@ -102,7 +103,7 @@ module.exports = function (RED) {
                     var authz = msg.req.get('authorization').split(' ');
                     if(authz.length == 2 && (authz[0] === 'Bearer' || (msg.prefix !== undefined && authz[0] === msg.prefix))){
                         msg.bearer = authz[1];
-                   }
+                    }
                 } else if (msg.req.query.access_token !== undefined) {
                     msg.bearer = msg.req.query.access_token;
                 } else if (msg.req.body !== undefined && msg.req.body.access_token !== undefined) {
@@ -123,9 +124,13 @@ module.exports = function (RED) {
                     //...otherwise use first key in set
                     key = node.jwk.keys[0];
                 }
-                
+
                 node.alg = header.alg;
                 node.secret = key.key.toPublicKeyPEM();
+            }
+
+            if (node.secb64enc === "true"){
+                node.secret = Buffer.from(node.secret, 'base64');
             }
 
             jwt.verify(msg[node.signvar], node.secret, {algorithms: node.alg}, function (err, decoded) {
